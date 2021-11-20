@@ -13,6 +13,7 @@ public class Main {
             List<CustomLinkedList<Station>> metroLines = fileManager.deserializeJSON();
             Metro metro = new Metro(metroLines);
             metro.addDepot();
+            metro.establishLinesConnections();
             menu(metro);
         } catch (FileNotFoundException | IllegalArgumentException e) {
             System.out.println(e.getMessage());
@@ -31,6 +32,8 @@ public class Main {
             String[] parameters = Validator.splitParameters(input);
             String lineName = parameters[0];
             String stationName = parameters[1];
+            String lineName2 = parameters[2];
+            String stationName2 = parameters[3];
             switch (command) {
                 case "/add-head":
                     metro.addHeadStation(lineName, stationName);
@@ -43,6 +46,9 @@ public class Main {
                     break;
                 case "/output":
                     metro.outputLine(lineName);
+                    break;
+                case "/connect":
+                    metro.connectLines(lineName, stationName, lineName2, stationName2);
                     break;
                 case "/exit":
                     isWorking = false;

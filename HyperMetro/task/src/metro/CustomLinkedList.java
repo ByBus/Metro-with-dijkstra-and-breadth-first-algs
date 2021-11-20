@@ -87,19 +87,40 @@ public class CustomLinkedList<T> {
         }
     }
 
+    public T find(T data) {
+        Node<T> nodeToFind = new Node<>(data);
+        Node<T> current = head;
+        while (!current.equals(nodeToFind) && current.nextNode != null) {
+            current = current.nextNode;
+        }
+        if (Objects.equals(current, nodeToFind)) {
+            return current.data;
+        }
+        return null;
+    }
+
+    public T getByIndex(int i) {
+        int iteration = 0;
+        Node<T> current = head;
+        while (i != iteration && iteration < length) {
+            current = current.nextNode;
+            iteration++;
+        }
+        if (current != null) {
+            return current.data;
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         Node<T> current = head;
-        while (current.nextNode != null) {
-            if (current.previousNode == null) {
-                current = current.nextNode;
-                continue;
-            }
-            String prev = current.previousNode.data.toString();
-            String next = current.nextNode.data.toString();
-            String str = prev + " - " + current.data + " - " + next + "\n";
+        boolean isEndOfTheList = false;
+        while (!isEndOfTheList) {
+            String str = current.data + "\n";
             buffer.append(str);
+            isEndOfTheList = current.nextNode == null;
             current = current.nextNode;
         }
         return buffer.toString();
@@ -114,6 +135,9 @@ class Node<T> {
     T data;
     Node<T> nextNode;
     Node<T> previousNode;
+    Node<T> transited;
+    boolean isVisited = false;
+    int distance = 0;
 
     public Node(T data) {
         this.data = data;

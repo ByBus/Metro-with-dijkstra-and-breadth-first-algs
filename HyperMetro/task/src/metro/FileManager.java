@@ -24,10 +24,10 @@ public class FileManager {
     public List<CustomLinkedList<Station>> deserializeJSON() throws FileNotFoundException {
         Gson gson = new Gson();
         List<CustomLinkedList<Station>> metroLines = new ArrayList<>();
-        Map<String, Map<Integer, String>> jsonDeserialized;
+        Map<String, Map<Integer, Station>> jsonDeserialized;
 
         try (Reader reader = Files.newBufferedReader(inputFile.toPath(), StandardCharsets.UTF_8)) {
-            TypeToken<Map<String, Map<Integer, String>>> modelOfData = new TypeToken<>() { };
+            TypeToken<Map<String, Map<Integer, Station>>> modelOfData = new TypeToken<>() { };
             jsonDeserialized = gson.fromJson(reader, modelOfData.getType());
         } catch (IOException | JsonIOException e) {
             throw new FileNotFoundException("Error! Such a file doesn't exist!");
@@ -38,18 +38,21 @@ public class FileManager {
         jsonDeserialized.forEach((lineName, stationData) ->
                 metroLines.add(addStationToLine(new CustomLinkedList<>(lineName), stationData))
         );
+
         return metroLines;
     }
 
     private CustomLinkedList<Station> addStationToLine(CustomLinkedList<Station> line,
-                                                       Map<Integer, String> stationData) {
+                                                       Map<Integer, Station> stationData) {
         List<Integer> sortedKeys = stationData.keySet()
                 .stream()
                 .sorted()
                 .collect(Collectors.toList());
         sortedKeys.forEach(stationNumber -> {
-            String stationName = stationData.get(stationNumber);
-            line.append(new Station(stationNumber, stationName));
+            Station station = stationData.get(stationNumber);
+            station.setId(stationNumber);
+            station.setTransferLine();
+            line.append(station);
         });
         return line;
     }
