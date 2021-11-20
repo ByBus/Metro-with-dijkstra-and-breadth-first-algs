@@ -5,47 +5,54 @@ import java.util.Objects;
 
 public class Station {
     private int id;
-    public String name;
-    private String line;
+    private String name;
+    private String transferLine;
     public List<Transfer> transfer;
-    private Station connected;
+    private Station connected = null;
+    private Station nextStation = null;
+    private Station previousStation = null;
+    private int distance = 0;
+    private boolean isVisited = false;
+
 
     public Station(int id, String name) {
         this.id = id;
-        this.name = name;
+        this.setName(name);
     }
 
     public Station(String name) {
         this(0, name);
     }
 
-    public Station(String name, List<Transfer> transfer) {
-        this.name = name;
-        this.transfer = transfer;
-    }
-
-    public void setTransferLine() {
+    public void setTransferLineName() {
         if (transfer != null && !transfer.isEmpty()) {
-            setLine(transfer.get(0).getLine());
+            setTransferLineName(transfer.get(0).getLine());
         }
     }
 
-    public void setLine(String line) {
-        this.line = line;
+    public boolean isNear(Station station) {
+        if (station == null) {
+            return false;
+        }
+        return  station.getDist() == distance - 1 || station.getDist() == distance;
+    }
+
+    public void setTransferLineName(String line) {
+        this.transferLine = line;
     }
 
     public void setId(int id) {
         this.id = id;
     }
 
-    public String getLine() {
-        return line == null ? "" : line;
+    public String getTransferLineName() {
+        return transferLine == null ? "" : transferLine;
     }
 
     @Override
     public String toString() {
-        String connected = this.connected != null ? String.format(" - %s (%s)", getConnected().name, getLine()) : "";
-        return name + connected;
+        String connected = this.connected != null ? String.format(" - %s (%s)", getConnected().getName(), getTransferLineName()) : "";
+        return getName() + connected;
     }
 
     @Override
@@ -59,7 +66,7 @@ public class Station {
         }
 
         Station other = (Station) obj;
-        return Objects.equals(this.name, other.name);
+        return Objects.equals(this.getName(), other.getName());
     }
 
     public Station getConnected() {
@@ -68,6 +75,46 @@ public class Station {
 
     public void setConnected(Station connected) {
         this.connected = connected;
+    }
+
+    public boolean isVisited() {
+        return isVisited;
+    }
+
+    public void setVisited(boolean visited) {
+        isVisited = visited;
+    }
+
+    public int getDist() {
+        return distance;
+    }
+
+    public void setDistance(int distance) {
+        this.distance = distance;
+    }
+
+    public Station getNextStation() {
+        return nextStation;
+    }
+
+    public void setNextStation(Station nextStation) {
+        this.nextStation = nextStation;
+    }
+
+    public Station getPreviousStation() {
+        return previousStation;
+    }
+
+    public void setPreviousStation(Station previousStation) {
+        this.previousStation = previousStation;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     private static class Transfer {

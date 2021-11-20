@@ -1,16 +1,17 @@
 package metro;
 
 import java.util.List;
+import java.util.Objects;
 
 public class Metro {
-    private final List<CustomLinkedList<Station>> metroLines;
-
-    public Metro(List<CustomLinkedList<Station>> lines) {
+    private final List<StationLinkedList> metroLines;
+    private final static int CONNECTED_STATION = 0;
+    public Metro(List<StationLinkedList> lines) {
         this.metroLines = lines;
     }
 
     public void addDepot() {
-        for (CustomLinkedList<Station> line : metroLines) {
+        for (StationLinkedList line : metroLines) {
             int newID = line.getLength() + 1;
             Station depot = new Station(newID, "depot");
             line.insert(depot, 0);
@@ -20,7 +21,7 @@ public class Metro {
     }
 
     public void addHeadStation(String lineName, String stationName) {
-        CustomLinkedList<Station> line = getLineByName(lineName);
+        StationLinkedList line = getLineByName(lineName);
         if (line == null) {
             return;
         }
@@ -28,7 +29,7 @@ public class Metro {
     }
 
     public void appendStation(String lineName, String stationName) {
-        CustomLinkedList<Station> line = getLineByName(lineName);
+        StationLinkedList line = getLineByName(lineName);
         if (line == null) {
             return;
         }
@@ -36,7 +37,7 @@ public class Metro {
     }
 
     public void removeStation(String lineName, String stationName) {
-        CustomLinkedList<Station> line = getLineByName(lineName);
+        StationLinkedList line = getLineByName(lineName);
         if (line == null) {
             return;
         }
@@ -44,7 +45,7 @@ public class Metro {
     }
 
     public void outputLine(String lineName) {
-        CustomLinkedList<Station> line = getLineByName(lineName);
+        StationLinkedList line = getLineByName(lineName);
         if (line == null) {
             return;
         }
@@ -53,13 +54,12 @@ public class Metro {
 
     public void connectLines(String lineAName, String stationAName,
                              String lineBName, String stationBName) {
-        CustomLinkedList<Station>[] lines = new CustomLinkedList[]
-                {getLineByName(lineAName), getLineByName(lineBName)};
+        StationLinkedList[] lines = {getLineByName(lineAName), getLineByName(lineBName)};
         if (lines[0] != null && lines[1] != null) {
-            Station[] stations = {lines[0].find(new Station(stationAName)), lines[1].find(new Station(stationBName))};
+            Station[] stations = {lines[0].find(stationAName), lines[1].find(stationBName)};
             if (stations[0] != null && stations[1] != null) {
-                stations[0].setLine(lineBName);
-                stations[1].setLine(lineAName);
+                stations[0].setTransferLineName(lineBName);
+                stations[1].setTransferLineName(lineAName);
                 connectTwoStations(stations[0], stations[1]);
             }
         }
@@ -69,14 +69,14 @@ public class Metro {
         metroLines.forEach(line -> {
             Station currentStation;
             Station connectedStation;
-            CustomLinkedList<Station> connectedLine;
+            StationLinkedList connectedLine;
             int i = 0;
             while (i < line.getLength()) {
                 currentStation = line.getByIndex(i++);
-                String connectedLineName = currentStation.getLine();
+                String connectedLineName = currentStation.getTransferLineName();
                 if (connectedLineName != null && !connectedLineName.isEmpty()) {
                     connectedLine = getLineByName(connectedLineName);
-                    connectedStation = connectedLine.find(currentStation);
+                    connectedStation = connectedLine.find(currentStation.getName());
                     connectTwoStations(currentStation, connectedStation);
                 }
             }
@@ -88,10 +88,60 @@ public class Metro {
         stationA.setConnected(stationB);
     }
 
-    private CustomLinkedList<Station> getLineByName(String lineName) {
+    private StationLinkedList getLineByName(String lineName) {
         return metroLines.stream()
-                .filter(line -> line.name.equals(lineName))
+                .filter(line -> line.getName().equals(lineName))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public void findRoute(String lineAName, String startStationName,
+                             String lineBName, String endStationName) {
+        Station startStation = getLineByName(lineAName).find(startStationName);
+        Station endStation = getLineByName(lineBName).find(endStationName);
+        breadthFirstThroughStations(startStation);
+        prettyPrintRoute(endStation);
+    }
+
+    private void prettyPrintRoute(Station endStation) {
+        StringBuilder stringBuilder = new StringBuilder();
+        boolean isStartStation = false;
+        Station current = endStation;
+        current.setVisited(false);
+        while (!isStartStation) {
+            isStartStation = Objects.equals(current.getDist(), 0);
+            stringBuilder.insert(0, current.getName() + "\n");
+            Station[] neighbors = {current.getPreviousStation(), current.getNextStation(), current.getConnected()};
+            for (Station neighbor : neighbors) {
+                if (current.isNear(neighbor) && neighbor.isVisited()) {
+                    if (neighbor.equals(current)) {
+                        stringBuilder.insert(0, "Transition to line " + neighbor.getTransferLineName() + "\n");
+                    }
+                    current = neighbor;
+                    current.setVisited(false);
+                }
+            }
+        }
+        System.out.println(stringBuilder);
+    }
+
+    private void breadthFirstThroughStations(Station station) {
+        Queue<Station> queue = new Queue<>();
+        station.setVisited(true);
+        station.setDistance(0);
+        queue.push(station);
+        while (queue.peek() != null) {
+            Station current = queue.pop();
+            Station[] neighbors = {current.getConnected(), current.getPreviousStation(), current.getNextStation()};
+            for (int i = 0; i < neighbors.length; i++) {
+                Station neighbor = neighbors[i];
+                if (neighbor != null && !neighbor.isVisited()) {
+                    int distance = i == CONNECTED_STATION ? 0 : 1;
+                    neighbor.setDistance(current.getDist() + distance);
+                    neighbor.setVisited(true);
+                    queue.push(neighbor);
+                }
+            }
+        }
     }
 }

@@ -10,7 +10,7 @@ public class Main {
         try {
             String fileName = args[0];
             FileManager fileManager = new FileManager(fileName);
-            List<CustomLinkedList<Station>> metroLines = fileManager.deserializeJSON();
+            List<StationLinkedList> metroLines = fileManager.deserializeJSON();
             Metro metro = new Metro(metroLines);
             metro.addDepot();
             metro.establishLinesConnections();
@@ -49,6 +49,9 @@ public class Main {
                     break;
                 case "/connect":
                     metro.connectLines(lineName, stationName, lineName2, stationName2);
+                    break;
+                case "/route":
+                    metro.findRoute(lineName, stationName, lineName2, stationName2);
                     break;
                 case "/exit":
                     isWorking = false;

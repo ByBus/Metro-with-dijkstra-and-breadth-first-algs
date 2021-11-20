@@ -21,9 +21,9 @@ public class FileManager {
         this.inputFile = new File(filePath);
     }
 
-    public List<CustomLinkedList<Station>> deserializeJSON() throws FileNotFoundException {
+    public List<StationLinkedList> deserializeJSON() throws FileNotFoundException {
         Gson gson = new Gson();
-        List<CustomLinkedList<Station>> metroLines = new ArrayList<>();
+        List<StationLinkedList> metroLines = new ArrayList<>();
         Map<String, Map<Integer, Station>> jsonDeserialized;
 
         try (Reader reader = Files.newBufferedReader(inputFile.toPath(), StandardCharsets.UTF_8)) {
@@ -36,14 +36,14 @@ public class FileManager {
         }
 
         jsonDeserialized.forEach((lineName, stationData) ->
-                metroLines.add(addStationToLine(new CustomLinkedList<>(lineName), stationData))
+                metroLines.add(addStationToLine(new StationLinkedList(lineName), stationData))
         );
 
         return metroLines;
     }
 
-    private CustomLinkedList<Station> addStationToLine(CustomLinkedList<Station> line,
-                                                       Map<Integer, Station> stationData) {
+    private StationLinkedList addStationToLine(StationLinkedList line,
+                                               Map<Integer, Station> stationData) {
         List<Integer> sortedKeys = stationData.keySet()
                 .stream()
                 .sorted()
@@ -51,7 +51,7 @@ public class FileManager {
         sortedKeys.forEach(stationNumber -> {
             Station station = stationData.get(stationNumber);
             station.setId(stationNumber);
-            station.setTransferLine();
+            station.setTransferLineName();
             line.append(station);
         });
         return line;
