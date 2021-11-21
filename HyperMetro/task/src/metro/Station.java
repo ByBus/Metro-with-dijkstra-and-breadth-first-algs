@@ -3,7 +3,8 @@ package metro;
 import java.util.List;
 import java.util.Objects;
 
-public class Station {
+public class Station implements Comparable<Station> {
+    public static final int INFINITY = Integer.MAX_VALUE;
     private int id;
     private String name;
     private String transferLine;
@@ -11,13 +12,17 @@ public class Station {
     private Station connected = null;
     private Station nextStation = null;
     private Station previousStation = null;
-    private int distance = 0;
+    private int time = 100;
+    private int calculatedTime = INFINITY;
     private boolean isVisited = false;
 
-
     public Station(int id, String name) {
+        this.name = name;
         this.id = id;
-        this.setName(name);
+    }
+    public Station(int id, String name, int time) {
+        this(id, name);
+        this.time = time;
     }
 
     public Station(String name) {
@@ -30,28 +35,22 @@ public class Station {
         }
     }
 
-    public boolean isNear(Station station) {
-        if (station == null) {
-            return false;
-        }
-        return  station.getDist() == distance - 1 || station.getDist() == distance;
-    }
-
     public void setTransferLineName(String line) {
         this.transferLine = line;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getTransferLineName() {
         return transferLine == null ? "" : transferLine;
     }
 
+    public boolean isHasConnected() {
+        return !(transfer == null || transfer.isEmpty());
+    }
+
     @Override
     public String toString() {
-        String connected = this.connected != null ? String.format(" - %s (%s)", getConnected().getName(), getTransferLineName()) : "";
+        String connected = this.connected != null ?
+                String.format(" - %s (%s)", getConnected().getName(), getTransferLineName()) : "";
         return getName() + connected;
     }
 
@@ -85,14 +84,6 @@ public class Station {
         isVisited = visited;
     }
 
-    public int getDist() {
-        return distance;
-    }
-
-    public void setDistance(int distance) {
-        this.distance = distance;
-    }
-
     public Station getNextStation() {
         return nextStation;
     }
@@ -113,8 +104,40 @@ public class Station {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public int getTimeToNextStation() {
+        return time;
+    }
+
+    public int getTimeToPreviousStation() {
+        if (previousStation == null) {
+            return 100;
+        }
+        return previousStation.getTimeToNextStation();
+    }
+
+    public int getCalculatedTime() {
+        return calculatedTime;
+    }
+
+    public void setCalculatedTime(int calculatedTime) {
+        this.calculatedTime = calculatedTime;
+    }
+
+    @Override
+    public int compareTo(Station other) {
+        int result = calculatedTime - other.calculatedTime;
+        if (result == 0) {
+            return isVisited ? -1 : 1;
+        } else {
+            return result;
+        }
+    }
+
+    public int getId() {
+        return id;
+    }
+    public void setId(int id) {
+        this.id = id;
     }
 
     private static class Transfer {

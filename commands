@@ -1,0 +1,29 @@
+/r m1 Epenex m1 Vigie
+/fastest-route "Linka A" "Borislavka" "Linka A" "Flora"
+
+/fastest-route Hammersmith-and-City "Baker street" Hammersmith-and-City Hammersmith
+/add Hammersmith-and-City New-Station 4
+/remove Hammersmith-and-City Hammersmith
+/output Hammersmith-and-City
+
+push
+10
+push
+124
+push
+345
+push
+12
+push
+1
+push
+56
+push
+23
+push
+17
+push
+44
+push
+8
+

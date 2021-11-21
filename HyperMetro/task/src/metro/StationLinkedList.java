@@ -25,13 +25,6 @@ public class StationLinkedList {
         length++;
     }
 
-    public void addHead(Station data) {
-        head.setPreviousStation(data);
-        data.setNextStation(head);
-        head = data;
-        length++;
-    }
-
     public void insert(Station newStation, int index) {
         int currentIndex = 0;
         Station current = head;
@@ -93,7 +86,7 @@ public class StationLinkedList {
         return null;
     }
 
-    public Station getByIndex(int i) {
+    public Station get(int i) {
         int iteration = 0;
         Station current = head;
         while (i != iteration && iteration < length) {

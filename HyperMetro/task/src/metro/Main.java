@@ -13,6 +13,7 @@ public class Main {
             List<StationLinkedList> metroLines = fileManager.deserializeJSON();
             Metro metro = new Metro(metroLines);
             metro.addDepot();
+            metro.correctTypo();
             metro.establishLinesConnections();
             menu(metro);
         } catch (FileNotFoundException | IllegalArgumentException e) {
@@ -32,14 +33,17 @@ public class Main {
             String[] parameters = Validator.splitParameters(input);
             String lineName = parameters[0];
             String stationName = parameters[1];
-            String lineName2 = parameters[2];
-            String stationName2 = parameters[3];
+            String lineNameOrTime = parameters[2];
+            String station2Name = parameters[3];
             switch (command) {
                 case "/add-head":
                     metro.addHeadStation(lineName, stationName);
                     break;
                 case "/append":
                     metro.appendStation(lineName, stationName);
+                    break;
+                case "/add":
+                    metro.appendStation(lineName, stationName, lineNameOrTime);
                     break;
                 case "/remove":
                     metro.removeStation(lineName, stationName);
@@ -48,10 +52,13 @@ public class Main {
                     metro.outputLine(lineName);
                     break;
                 case "/connect":
-                    metro.connectLines(lineName, stationName, lineName2, stationName2);
+                    metro.connectLines(lineName, stationName, lineNameOrTime, station2Name);
                     break;
                 case "/route":
-                    metro.findRoute(lineName, stationName, lineName2, stationName2);
+                    metro.findRoute(lineName, stationName, lineNameOrTime, station2Name, false);
+                    break;
+                case "/fastest-route":
+                    metro.findRoute(lineName, stationName, lineNameOrTime, station2Name, true);
                     break;
                 case "/exit":
                     isWorking = false;

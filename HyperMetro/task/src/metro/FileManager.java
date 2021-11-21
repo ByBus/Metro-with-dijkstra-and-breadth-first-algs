@@ -52,6 +52,7 @@ public class FileManager {
             Station station = stationData.get(stationNumber);
             station.setId(stationNumber);
             station.setTransferLineName();
+            station.setCalculatedTime(Station.INFINITY);
             line.append(station);
         });
         return line;

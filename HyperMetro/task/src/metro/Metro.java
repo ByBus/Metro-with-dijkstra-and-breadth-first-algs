@@ -1,11 +1,9 @@
 package metro;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class Metro {
     private final List<StationLinkedList> metroLines;
-    private final static int CONNECTED_STATION = 0;
     public Metro(List<StationLinkedList> lines) {
         this.metroLines = lines;
     }
@@ -34,6 +32,15 @@ public class Metro {
             return;
         }
         line.insert(new Station(line.getLength() + 1, stationName), line.getLength() - 1);
+    }
+
+    public void appendStation(String lineName, String stationName, String time) {
+        StationLinkedList line = getLineByName(lineName);
+        if (line == null) {
+            return;
+        }
+        line.insert(new Station(line.getLength() + 1, stationName, Integer.parseInt(time)),
+                line.getLength() - 1);
     }
 
     public void removeStation(String lineName, String stationName) {
@@ -72,7 +79,7 @@ public class Metro {
             StationLinkedList connectedLine;
             int i = 0;
             while (i < line.getLength()) {
-                currentStation = line.getByIndex(i++);
+                currentStation = line.get(i++);
                 String connectedLineName = currentStation.getTransferLineName();
                 if (connectedLineName != null && !connectedLineName.isEmpty()) {
                     connectedLine = getLineByName(connectedLineName);
@@ -96,52 +103,18 @@ public class Metro {
     }
 
     public void findRoute(String lineAName, String startStationName,
-                             String lineBName, String endStationName) {
+                          String lineBName, String endStationName, boolean isDijkstra) {
         Station startStation = getLineByName(lineAName).find(startStationName);
         Station endStation = getLineByName(lineBName).find(endStationName);
-        breadthFirstThroughStations(startStation);
-        prettyPrintRoute(endStation);
+        PathFinder pathFinder = isDijkstra ? new DijkstraAlgorithm() : new BreadthFirstAlgorithm();
+        pathFinder.createRoute(startStation, endStation, isDijkstra);
     }
 
-    private void prettyPrintRoute(Station endStation) {
-        StringBuilder stringBuilder = new StringBuilder();
-        boolean isStartStation = false;
-        Station current = endStation;
-        current.setVisited(false);
-        while (!isStartStation) {
-            isStartStation = Objects.equals(current.getDist(), 0);
-            stringBuilder.insert(0, current.getName() + "\n");
-            Station[] neighbors = {current.getPreviousStation(), current.getNextStation(), current.getConnected()};
-            for (Station neighbor : neighbors) {
-                if (current.isNear(neighbor) && neighbor.isVisited()) {
-                    if (neighbor.equals(current)) {
-                        stringBuilder.insert(0, "Transition to line " + neighbor.getTransferLineName() + "\n");
-                    }
-                    current = neighbor;
-                    current.setVisited(false);
-                }
-            }
-        }
-        System.out.println(stringBuilder);
-    }
-
-    private void breadthFirstThroughStations(Station station) {
-        Queue<Station> queue = new Queue<>();
-        station.setVisited(true);
-        station.setDistance(0);
-        queue.push(station);
-        while (queue.peek() != null) {
-            Station current = queue.pop();
-            Station[] neighbors = {current.getConnected(), current.getPreviousStation(), current.getNextStation()};
-            for (int i = 0; i < neighbors.length; i++) {
-                Station neighbor = neighbors[i];
-                if (neighbor != null && !neighbor.isVisited()) {
-                    int distance = i == CONNECTED_STATION ? 0 : 1;
-                    neighbor.setDistance(current.getDist() + distance);
-                    neighbor.setVisited(true);
-                    queue.push(neighbor);
-                }
-            }
+    public void correctTypo() {
+        StationLinkedList lineWithBuggyStation = getLineByName("Linka B");
+        if (lineWithBuggyStation != null) {
+            Station buggyStation = lineWithBuggyStation.find("Mustek");
+            buggyStation.setTransferLineName("Linka A");
         }
     }
 }
