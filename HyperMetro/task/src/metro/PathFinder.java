@@ -46,6 +46,10 @@ abstract class PathFinder {
                 .findFirst()
                 .orElse(null);
     }
+
+    Station[] getNeighbors(Station station) {
+        return new Station[]{station.getConnected(), station.getPreviousStation(), station.getNextStation()};
+    }
 }
 
 class DijkstraAlgorithm extends PathFinder {
@@ -53,7 +57,7 @@ class DijkstraAlgorithm extends PathFinder {
     public void runThrough(Queue<Station> queue) {
         while (queue.peek() != null) {
             Station current = queue.priorityPop();
-            Station[] neighbors = {current.getConnected(), current.getPreviousStation(), current.getNextStation()};
+            Station[] neighbors = getNeighbors(current);
             for (int i = 0; i < neighbors.length; i++) {
                 Station neighbor = neighbors[i];
                 if (neighbor != null && !neighbor.isVisited()) {
@@ -78,7 +82,7 @@ class BreadthFirstAlgorithm extends PathFinder {
     public void runThrough(Queue<Station> queue) {
         while (queue.peek() != null) {
             Station current = queue.pop();
-            Station[] neighbors = {current.getConnected(), current.getPreviousStation(), current.getNextStation()};
+            Station[] neighbors = getNeighbors(current);
             for (int i = 0; i < neighbors.length; i++) {
                 Station neighbor = neighbors[i];
                 if (neighbor != null && !neighbor.isVisited()) {
