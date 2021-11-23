@@ -5,8 +5,8 @@ import java.util.regex.Pattern;
 
 public class Validator {
     private static final Pattern COMMAND = Pattern.compile("(/[a-zA-Z-]+)\\b");
-    private static final Pattern CORRECT_INPUT = Pattern.compile("/[a-zA-Z-]+( \"[a-zA-Z- \\d.]+\"| [a-zA-Z-\\d.]+){0,4}");
-    private static final Pattern ARGUMENTS_DELIMITERS = Pattern.compile("(\"[a-zA-Z- \\d.]+\"|\\b[a-zA-Z-\\d.]+\\b)");
+    private static final Pattern CORRECT_INPUT = Pattern.compile("/[a-zA-Z-&]+( \"[a-zA-Z-& \\d.]+\"| [a-zA-Z-&\\d.]+){0,4}");
+    private static final Pattern ARGUMENTS_DELIMITERS = Pattern.compile("(\"[a-zA-Z-& \\d.]+\"|\\b[a-zA-Z-&\\d.]+\\b)");
 
     public static String getCommandFromInput(String input) {
         Matcher matcher = COMMAND.matcher(input);

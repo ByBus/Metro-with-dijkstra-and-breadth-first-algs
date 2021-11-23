@@ -10,11 +10,9 @@ public class Main {
         try {
             String fileName = args[0];
             FileManager fileManager = new FileManager(fileName);
-            List<StationLinkedList> metroLines = fileManager.deserializeJSON();
+            List<NonLinearMetroLine> metroLines = fileManager.deserializeJSON();
             Metro metro = new Metro(metroLines);
-            metro.addDepot();
-            metro.correctTypo();
-            metro.establishLinesConnections();
+            metro.connectTransferLines();
             menu(metro);
         } catch (FileNotFoundException | IllegalArgumentException e) {
             System.out.println(e.getMessage());
@@ -36,24 +34,6 @@ public class Main {
             String lineNameOrTime = parameters[2];
             String station2Name = parameters[3];
             switch (command) {
-                case "/add-head":
-                    metro.addHeadStation(lineName, stationName);
-                    break;
-                case "/append":
-                    metro.appendStation(lineName, stationName);
-                    break;
-                case "/add":
-                    metro.appendStation(lineName, stationName, lineNameOrTime);
-                    break;
-                case "/remove":
-                    metro.removeStation(lineName, stationName);
-                    break;
-                case "/output":
-                    metro.outputLine(lineName);
-                    break;
-                case "/connect":
-                    metro.connectLines(lineName, stationName, lineNameOrTime, station2Name);
-                    break;
                 case "/route":
                     metro.findRoute(lineName, stationName, lineNameOrTime, station2Name, false);
                     break;

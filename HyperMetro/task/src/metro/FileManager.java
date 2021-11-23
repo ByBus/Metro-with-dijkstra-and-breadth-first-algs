@@ -12,7 +12,6 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class FileManager {
     private final File inputFile;
@@ -21,13 +20,13 @@ public class FileManager {
         this.inputFile = new File(filePath);
     }
 
-    public List<StationLinkedList> deserializeJSON() throws FileNotFoundException {
+    public List<NonLinearMetroLine> deserializeJSON() throws FileNotFoundException {
         Gson gson = new Gson();
-        List<StationLinkedList> metroLines = new ArrayList<>();
-        Map<String, Map<Integer, Station>> jsonDeserialized;
+        List<NonLinearMetroLine> metroLines = new ArrayList<>();
+        Map<String, List<Station>> jsonDeserialized;
 
         try (Reader reader = Files.newBufferedReader(inputFile.toPath(), StandardCharsets.UTF_8)) {
-            TypeToken<Map<String, Map<Integer, Station>>> modelOfData = new TypeToken<>() { };
+            TypeToken<Map<String, List<Station>>> modelOfData = new TypeToken<>() { };
             jsonDeserialized = gson.fromJson(reader, modelOfData.getType());
         } catch (IOException | JsonIOException e) {
             throw new FileNotFoundException("Error! Such a file doesn't exist!");
@@ -35,26 +34,21 @@ public class FileManager {
             throw new IllegalArgumentException("Incorrect file");
         }
 
-        jsonDeserialized.forEach((lineName, stationData) ->
-                metroLines.add(addStationToLine(new StationLinkedList(lineName), stationData))
+        jsonDeserialized.forEach((lineName, stations) ->
+                metroLines.add(addStationsToLine(new NonLinearMetroLine(lineName), stations))
         );
 
         return metroLines;
     }
 
-    private StationLinkedList addStationToLine(StationLinkedList line,
-                                               Map<Integer, Station> stationData) {
-        List<Integer> sortedKeys = stationData.keySet()
-                .stream()
-                .sorted()
-                .collect(Collectors.toList());
-        sortedKeys.forEach(stationNumber -> {
-            Station station = stationData.get(stationNumber);
-            station.setId(stationNumber);
-            station.setTransferLineName();
-            station.setCalculatedTime(Station.INFINITY);
-            line.append(station);
+    private NonLinearMetroLine addStationsToLine(NonLinearMetroLine metroLine,
+                                                 List<Station> stations) {
+        stations.forEach(station -> {
+            station.setLineName(metroLine.getName());
+            station.init();
         });
-        return line;
+        metroLine.setStations(stations);
+        metroLine.connectStations();
+        return metroLine;
     }
 }
