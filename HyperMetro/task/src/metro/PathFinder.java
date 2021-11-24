@@ -23,29 +23,25 @@ abstract class PathFinder {
         while (!isRouteFinished) {
             isRouteFinished = Objects.equals(current.getCalculatedTime(), 0)
                     && Objects.equals(current.getLineName(), startStation.getLineName());
-            route.add(0, current);
+            addStationToRoute(current, route);
             Station[] neighbors = getNeighbors(current);
             current = getWithLeastTime(neighbors);
             current.setVisited(false);
         }
-        return removeLoopsAmongConnectedStation(route);
+        return route;
     }
 
-    protected List<Station> removeLoopsAmongConnectedStation(List<Station> route) {
-        List<Station> resultList = new ArrayList<>();
-        List<Station> buffer = new ArrayList<>();
-        for (Station station : route) {
-            if (!buffer.isEmpty() && !Objects.equals(buffer.get(0), station)) {
-                resultList.add(buffer.get(0));
-                if (buffer.size() > 1) {
-                    resultList.add(buffer.get(buffer.size() - 1));
-                }
-                buffer.clear();
+    protected void addStationToRoute(Station station, List<Station> route) {
+        route.add(0, station);
+        // Removes middle elements if there are several identical elements in a row
+        // i.e. more than 2 lines connected at the same station
+        if (route.size() > 2) {
+            List<Station> first3Stations = route.subList(0, 3);
+            if (first3Stations.stream()
+                    .allMatch(first3Stations.get(1)::equals)) {
+                route.remove(1);
             }
-            buffer.add(station);
         }
-        resultList.addAll(buffer);
-        return resultList;
     }
 
     private void printRoute(List<Station> route, boolean isAddTravelTime) {
@@ -94,10 +90,8 @@ class DijkstraAlgorithm extends PathFinder {
             Station[] neighbors = getNeighbors(current);
             for (Station neighbor : neighbors) {
                 if (neighbor != null && !neighbor.isVisited()) {
-                    int time = current.getTimeToNextStation();
-                    if (current.isPrevious(neighbor)) {
-                        time = neighbor.getTimeToNextStation();
-                    }
+                    int time = !current.isPrevious(neighbor) ?
+                            current.getTimeToNextStation() : neighbor.getTimeToNextStation();
                     if (current.isTransfer(neighbor)) {
                         time = 5;
                     }
